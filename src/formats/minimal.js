@@ -4,33 +4,23 @@
 
 exports.format = format;
 
-function format (reports) {
-    var formatted = '', i;
-
-    for (i = 0; i < reports.length; i += 1) {
-        formatted += formatModule(reports[i]) + '\n';
-    }
-
-    return formatted;
+function format (result) {
+    return result.reports.reduce(function (formatted, report) {
+        return formatted + formatModule(report) + '\n';
+    }, '');
 }
 
 function formatModule (report) {
     return [
-        report.module,
-        ': ',
-        report.maintainability,
+        report.path, ': ', report.maintainability,
         formatFunctions(report.functions)
     ].join('');
 }
 
 function formatFunctions (report) {
-    var formatted = '', i;
-
-    for (i = 0; i < report.length; i += 1) {
-        formatted += '\n' + formatFunction(report[i]);
-    }
-
-    return formatted;
+    return report.reduce(function (formatted, r) {
+        return formatted + '\n' + formatFunction(r);
+    }, '');
 }
 
 function formatFunction (report) {
@@ -40,7 +30,7 @@ function formatFunction (report) {
         ' (',
         report.line,
         '): ',
-        report.complexity.cyclomatic
+        report.cyclomatic
     ].join('');
 }
 

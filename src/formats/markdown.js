@@ -4,49 +4,58 @@
 
 exports.format = format;
 
-function format (reports) {
-    var formatted = '# Complexity report ~ ' + (new Date()).toLocaleDateString() + '\n\n', i;
+function format (result) {
+    return result.reports.reduce(function (formatted, report) {
+        return formatted + formatModule(report) + '\n\n';
+    }, formatProject(result));
+}
 
-    for (i = 0; i < reports.length; i += 1) {
-        formatted += formatModule(reports[i]) + '\n\n';
-    }
-
-    return formatted;
+function formatProject (result) {
+    return [
+        '# Complexity report, ', (new Date()).toLocaleDateString(), '\n\n',
+        '* Mean per-function logical LOC: ', result.loc, '\n',
+        '* Mean per-function parameter count: ', result.params, '\n',
+        '* Mean per-function cyclomatic complexity: ', result.cyclomatic, '\n',
+        '* Mean per-function Halstead effort: ', result.effort, '\n',
+        '* Mean per-module maintainability index: ', result.maintainability, '\n',
+        '* First-order density: ', result.firstOrderDensity, '%\n',
+        '* Change cost: ', result.changeCost, '%\n',
+        '* Core size: ', result.coreSize, '%\n\n'
+    ].join('');
 }
 
 function formatModule (report) {
     return [
-        '## ',
-        report.module,
-        '\n\n',
+        '## ', report.path, '\n\n',
+        '* Physical LOC: ', report.aggregate.sloc.physical, '\n',
+        '* Logical LOC: ', report.aggregate.sloc.logical, '\n',
+        '* Mean parameter count: ', report.params, '\n',
+        '* Cyclomatic complexity: ', report.aggregate.cyclomatic, '\n',
+        '* Cyclomatic complexity density: ', report.aggregate.cyclomaticDensity, '%\n',
         '* Maintainability index: ', report.maintainability, '\n',
-        '* Aggregate cyclomatic complexity: ', report.aggregate.complexity.cyclomatic, '\n',
-        '* Mean parameter count: ', report.params,
+        '* Dependency count: ', report.dependencies.length,
         formatFunctions(report.functions)
     ].join('');
 }
 
 function formatFunctions (report) {
-    var formatted = '', i;
-
-    for (i = 0; i < report.length; i += 1) {
-        formatted += '\n' + formatFunction(report[i]);
-    }
-
-    return formatted;
+    return report.reduce(function (formatted, r) {
+        return formatted + '\n' + formatFunction(r);
+    }, '');
 }
 
 function formatFunction (report) {
     return [
         '* Function: **', report.name.replace('<', '&lt;'), '**\n',
         '    * Line No.: ', report.line, '\n',
-        '    * Physical SLOC: ', report.complexity.sloc.physical, '\n',
-        '    * Logical SLOC: ', report.complexity.sloc.logical, '\n',
-        '    * Parameter count: ', report.complexity.params, '\n',
-        '    * Cyclomatic complexity: ', report.complexity.cyclomatic, '\n',
-        '    * Halstead difficulty: ', report.complexity.halstead.difficulty, '\n',
-        '    * Halstead volume: ', report.complexity.halstead.volume, '\n',
-        '    * Halstead effort: ', report.complexity.halstead.effort
+        '    * Physical LOC: ', report.sloc.physical, '\n',
+        '    * Logical LOC: ', report.sloc.logical, '\n',
+        '    * Parameter count: ', report.params, '\n',
+        '    * Cyclomatic complexity: ', report.cyclomatic, '\n',
+        '    * Cyclomatic complexity density: ', report.cyclomaticDensity, '%\n',
+        '    * Halstead difficulty: ', report.halstead.difficulty, '\n',
+        '    * Halstead volume: ', report.halstead.volume, '\n',
+        '    * Halstead effort: ', report.halstead.effort
     ].join('');
 }
 
